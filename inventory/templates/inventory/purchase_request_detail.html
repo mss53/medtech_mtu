@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Заявка №{{ purchase_request.id }}</title>
+    <style>
+        body {
+            background: #f4f6fb;
+            font-family: "Segoe UI", "Arial", sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(24,38,80,0.14);
+            padding: 38px 32px 28px 32px;
+        }
+        h2 {
+            margin-top: 0;
+            font-weight: 700;
+            font-size: 1.18em;
+            color: #1a2450;
+            margin-bottom: 18px;
+        }
+        h3 {
+            margin-top: 24px;
+            margin-bottom: 12px;
+            color: #3652b2;
+            font-size: 1.08em;
+            font-weight: 700;
+        }
+        .status-block {
+            margin: 8px 0 20px 0;
+        }
+        .status-label {
+            color: #2f3b68;
+            font-weight: 500;
+        }
+        .status-value {
+            font-weight: 600;
+            color: #3351ba;
+        }
+        form {
+            margin: 16px 0 18px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        select, input[type="text"] {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #d1d6e0;
+            background: #f7f9fc;
+            font-size: 1em;
+            transition: border .18s;
+        }
+        select:focus, input[type="text"]:focus {
+            border: 1.5px solid #3652b2;
+            outline: none;
+            background: #eef2fa;
+        }
+        button[type="submit"] {
+            padding: 9px 20px;
+            background: #3351ba;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-size: 1em;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(51,81,186,0.08);
+            cursor: pointer;
+            transition: background .18s;
+        }
+        button[type="submit"]:hover {
+            background: #21306e;
+        }
+        .btn {
+            display: inline-block;
+            margin-bottom: 16px;
+            text-decoration: none;
+            color: #3351ba;
+            background: #eef2fa;
+            padding: 10px 22px;
+            border-radius: 8px;
+            transition: background .16s, color .16s;
+            font-weight: 600;
+        }
+        .btn:hover {
+            background: #cdd9f3;
+            color: #21306e;
+        }
+        ul {
+            margin: 0 0 18px 0;
+            padding-left: 18px;
+        }
+        ul li {
+            margin-bottom: 6px;
+            font-size: 1.03em;
+        }
+        .back-link {
+            display: inline-block;
+            text-decoration: none;
+            color: #3351ba;
+            background: #eef2fa;
+            padding: 7px 16px;
+            border-radius: 8px;
+            transition: background .16s, color .16s;
+            font-weight: 500;
+            text-align: center;
+        }
+        .back-link:hover {
+            background: #cdd9f3;
+            color: #21306e;
+        }
+        @media (max-width: 540px) {
+            .container {
+                margin: 12px;
+                padding: 13px 4vw 10px 4vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Заявка №{{ purchase_request.id }} ({{ purchase_request.department }})</h2>
+        <div class="status-block">
+            <div class="status-label">Создана:</div>
+            <div class="status-value" style="margin-bottom:4px;">{{ purchase_request.created_at|date:"d.m.Y H:i" }}</div>
+            <div class="status-label">Статус:</div>
+            <div class="status-value">{{ purchase_request.get_status_display }}</div>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ status_form.status.label_tag }} {{ status_form.status }}
+            <button type="submit">Обновить статус</button>
+        </form>
+
+        <a href="{% url 'create_purchase_order' purchase_request.id %}" class="btn">Оформить заказ поставщику</a>
+
+        <h3>Позиции:</h3>
+        <ul>
+            {% for item in purchase_request.items.all %}
+                <li>{{ item.item.name }} — {{ item.quantity }}</li>
+            {% empty %}
+                <li>Нет позиций</li>
+            {% endfor %}
+        </ul>
+
+        <a href="{% url 'purchase_requests_list' %}" class="back-link">Назад к списку заявок</a>
+    </div>
+</body>
+</html>
+

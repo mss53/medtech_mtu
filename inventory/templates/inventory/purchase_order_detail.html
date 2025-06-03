@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Заказ поставщику №{{ order.id }}</title>
+    <style>
+        body {
+            background: #f4f6fb;
+            font-family: "Segoe UI", "Arial", sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 480px;
+            margin: 60px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(24,38,80,0.14);
+            padding: 38px 32px 26px 32px;
+        }
+        h2 {
+            margin-top: 0;
+            font-weight: 700;
+            font-size: 1.22em;
+            color: #1a2450;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+        .field-label {
+            color: #2f3b68;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .field-value {
+            margin-bottom: 15px;
+            font-size: 1.03em;
+        }
+        .download-link {
+            color: #3351ba;
+            background: #eef2fa;
+            padding: 6px 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background .15s, color .15s;
+            margin-left: 8px;
+        }
+        .download-link:hover {
+            background: #cdd9f3;
+            color: #21306e;
+        }
+        .status {
+            display: inline-block;
+            padding: 6px 13px;
+            border-radius: 7px;
+            background: #e7f1fb;
+            color: #3351ba;
+            font-weight: 600;
+            font-size: 1em;
+            margin-bottom: 12px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 18px;
+            text-decoration: none;
+            color: #3351ba;
+            background: #eef2fa;
+            padding: 8px 18px;
+            border-radius: 8px;
+            transition: background .16s, color .16s;
+            font-weight: 500;
+            text-align: center;
+        }
+        .back-link:hover {
+            background: #cdd9f3;
+            color: #21306e;
+        }
+        @media (max-width: 540px) {
+            .container {
+                margin: 14px;
+                padding: 14px 4vw 8px 4vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Заказ поставщику №{{ order.id }}</h2>
+        <div class="field-label">Поставщик:</div>
+        <div class="field-value">{{ order.supplier.name }}</div>
+        
+        <div class="field-label">Номер договора:</div>
+        <div class="field-value">{{ order.contract_number }}</div>
+        
+        <div class="field-label">Файл договора:</div>
+        <div class="field-value">
+            {% if order.contract_file %}
+                <a href="{{ order.contract_file.url }}" class="download-link" download>Скачать договор</a>
+            {% else %}
+                <span style="color: #b3b9c8;">Не загружен</span>
+            {% endif %}
+        </div>
+        
+        <div class="field-label">По заявке:</div>
+        <div class="field-value">
+            <a href="{% url 'purchase_request_detail' order.request.id %}">{{ order.request }}</a>
+        </div>
+        
+        <div class="field-label">Статус:</div>
+        <div class="status">{{ order.get_status_display }}</div>
+        
+        <div class="field-label">Комментарий:</div>
+        <div class="field-value">{{ order.comment }}</div>
+        
+        <a href="{% url 'purchase_requests_list' %}" class="back-link">Назад к списку заказов</a>
+    </div>
+</body>
+</html>
+

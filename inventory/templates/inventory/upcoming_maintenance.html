@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Предстоящие обслуживания и поверки</title>
+    <style>
+        body {
+            background: #f4f6fb;
+            font-family: "Segoe UI", "Arial", sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1080px;
+            margin: 38px auto 24px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(24,38,80,0.13);
+            padding: 32px 32px 22px 32px;
+        }
+        h2 {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.19em;
+            color: #1a2450;
+            margin: 10px 0 22px 0;
+        }
+        .messages {
+            max-width: 700px;
+            margin: 0 auto 16px auto;
+            padding: 0;
+            list-style: none;
+        }
+        .messages li {
+            padding: 10px 15px;
+            border-radius: 7px;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .messages li.success {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+        .messages li.error {
+            background: #f8d7da;
+            color: #842029;
+        }
+        .filters-block {
+            margin-bottom: 18px;
+            text-align: center;
+        }
+        form.filter-form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 13px 22px;
+            margin-bottom: 0;
+        }
+        form.filter-form label {
+            color: #2f3b68;
+            font-weight: 500;
+        }
+        form.filter-form select {
+            padding: 7px 11px;
+            border-radius: 8px;
+            border: 1px solid #d1d6e0;
+            background: #f7f9fc;
+            font-size: 1em;
+            margin-left: 4px;
+            transition: border .18s;
+        }
+        form.filter-form select:focus {
+            border: 1.5px solid #3652b2;
+            outline: none;
+            background: #eef2fa;
+        }
+        form.filter-form button[type="submit"] {
+            padding: 9px 20px;
+            background: #3351ba;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .18s;
+            margin-left: 8px;
+        }
+        form.filter-form button[type="submit"]:hover {
+            background: #21306e;
+        }
+        .btn, .action-btn {
+            display: inline-block;
+            padding: 9px 18px;
+            background: #198754;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            margin: 0 6px 10px 0;
+            font-size: 1em;
+            transition: background .14s, color .14s;
+            cursor: pointer;
+        }
+        .btn:hover, .action-btn:hover {
+            background: #146c43;
+        }
+        .btn-blue {
+            background: #0d6efd;
+        }
+        .btn-blue:hover {
+            background: #0a58ca;
+        }
+        .btn-main {
+            background: #3351ba;
+        }
+        .btn-main:hover {
+            background: #21306e;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #f7f9fc;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 auto 18px auto;
+            font-size: 0.99em;
+        }
+        th, td {
+            padding: 11px 8px;
+            text-align: left;
+        }
+        th {
+            background: #eef2fa;
+            color: #2f3b68;
+            font-weight: 600;
+        }
+        tr:not(:last-child) td {
+            border-bottom: 1px solid #e7eaf3;
+        }
+        tr.overdue {
+            background: #ffe0e0 !important;
+        }
+        tr.due_soon {
+            background: #fffbe0 !important;
+        }
+        tr:hover td {
+            background: #f0f7fa;
+            transition: background .15s;
+        }
+        @media (max-width: 1050px) {
+            .container {
+                max-width: 99vw;
+                padding: 10px 2vw 6px 2vw;
+            }
+        }
+        @media (max-width: 700px) {
+            form.filter-form {
+                flex-direction: column;
+                gap: 10px 0;
+            }
+            table, th, td {
+                font-size: 0.92em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% if messages %}
+          <ul class="messages">
+            {% for message in messages %}
+              <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        <div class="filters-block">
+            <form method="get" class="filter-form">
+                <label>Тип обслуживания:
+                    <select name="type">
+                        <option value="">Все</option>
+                        {% for value, label in maint_types %}
+                            <option value="{{ value }}" {% if value == selected_type %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Ответственный:
+                    <select name="responsible">
+                        <option value="">Все</option>
+                        {% for r in responsibles %}
+                            <option value="{{ r.id }}" {% if r.id|stringformat:"s" == selected_responsible %}selected{% endif %}>
+                                {{ r.get_full_name|default:r.username }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button type="submit">Фильтровать</button>
+                <a href="{% url 'maintenance_add' %}" class="btn btn-main">Добавить запись</a>
+            </form>
+        </div>
+
+        <h2>Предстоящие обслуживания и поверки (ближайшие 2 недели)</h2>
+        <div style="text-align:center; margin-bottom:18px;">
+            <a href="{% url 'home' %}" class="btn btn-alt">На главную</a>
+            <a href="{% url 'maintenance_add' %}" class="btn btn-main">Добавить запись ТО/ремонта</a>
+        </div>
+        <table>
+            <tr>
+                <th>Оборудование</th>
+                <th>Тип обслуживания</th>
+                <th>Дата следующего ТО</th>
+                <th>Ответственный</th>
+                <th>Комментарий</th>
+                <th>Действия</th>
+            </tr>
+            {% for s in schedules %}
+            <tr
+              {% if s.next_due_date|date:"U" < today|date:"U" %} class="overdue"
+              {% elif s.next_due_date|date:"U" == today|date:"U" %} class="due_soon"
+              {% endif %}
+            >
+                <td>{{ s.item_card }}</td>
+                <td>{{ s.get_maintenance_type_display }}</td>
+                <td>{{ s.next_due_date|date:"d.m.Y" }}</td>
+                <td>{{ s.responsible.get_full_name|default:s.responsible.username }}</td>
+                <td>{{ s.comment }}</td>
+                <td>
+                    <form method="post" action="{% url 'maintenance_remind' s.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="action-btn btn-blue">Отправить напоминание</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align:center;">Нет запланированных ТО/ремонтов в ближайшие 2 недели</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная - МТО ООО "Медтех"</title>
+    <style>
+        body {
+            background: #f4f6fb;
+            font-family: "Segoe UI", "Arial", sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 420px;
+            margin: 60px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(24,38,80,0.14);
+            padding: 38px 30px 24px 30px;
+        }
+        h2 {
+            margin-top: 0;
+            font-weight: 700;
+            font-size: 1.6em;
+            color: #1a2450;
+        }
+        .role {
+            background: #eef2fa;
+            color: #3652b2;
+            padding: 7px 14px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 18px;
+            font-weight: 500;
+            font-size: 1em;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 28px;
+        }
+        ul li {
+            margin: 0 0 13px 0;
+            font-size: 1.08em;
+        }
+        ul li a {
+            text-decoration: none;
+            color: #3351ba;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 9px;
+            transition: background .18s, color .18s;
+            background: #eef2fa;
+        }
+        ul li a:hover {
+            background: #cdd9f3;
+            color: #21306e;
+        }
+        .inactive {
+            color: #9fa8b7;
+            background: none !important;
+            font-style: italic;
+            padding-left: 0;
+        }
+        .logout {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 7px 16px;
+            color: #fff;
+            background: #e04a4a;
+            border-radius: 9px;
+            text-decoration: none;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(224,74,74,0.13);
+            transition: background .18s;
+        }
+        .logout:hover {
+            background: #bd2e2e;
+        }
+        @media (max-width: 520px) {
+            .container {
+                margin: 18px;
+                padding: 16px 6vw 12px 6vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Здравствуйте, {{ user.get_full_name|default:user.username }}!</h2>
+        <div class="role">
+            Ваша роль:
+            {% if user.is_superuser %}
+                Администратор
+            {% elif is_storekeeper %}
+                Кладовщик
+            {% elif is_maintenance %}
+                Ответственный по ТО
+            {% elif is_procurement %}
+                Снабженец
+            {% elif is_manager %}
+                Руководитель
+            {% else %}
+                Пользователь
+            {% endif %}
+        </div>
+        <ul>
+            {% if user.is_superuser or is_storekeeper %}
+                <li><a href="{% url 'stock_list' %}">Текущие запасы</a></li>
+                <li><a href="{% url 'movements' %}">Движения МТС</a></li>
+                <li class="inactive">Документы (в разработке)</li>
+            {% endif %}
+            {% if user.is_superuser or is_maintenance %}
+                <li><a href="{% url 'upcoming_maintenance' %}">График ТО (ближайшие 2 недели)</a></li>
+            {% endif %}
+            {% if user.is_superuser or is_procurement %}
+                <li><a href="{% url 'purchase_requests_list' %}">Заявки на снабжение</a></li>
+            {% endif %}
+            {% if user.is_superuser or is_manager %}
+                <li class="inactive">Аналитические отчёты (в разработке)</li>
+            {% endif %}
+        </ul>
+        <a href="{% url 'logout' %}" class="logout">Выйти</a>
+    </div>
+</body>
+</html>
+

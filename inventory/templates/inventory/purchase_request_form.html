@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if edit_mode %}Редактировать{% else %}Создать{% endif %} заявку на закупку</title>
+    <style>
+        body {
+            background: #f4f6fb;
+            font-family: "Segoe UI", "Arial", sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 580px;
+            margin: 48px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(24,38,80,0.14);
+            padding: 36px 32px 26px 32px;
+        }
+        h2 {
+            margin-top: 0;
+            font-weight: 700;
+            font-size: 1.22em;
+            color: #1a2450;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+        h3 {
+            color: #3652b2;
+            font-size: 1.08em;
+            margin-top: 24px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        form {
+            margin-bottom: 0;
+        }
+        form p {
+            margin-bottom: 16px;
+        }
+        label {
+            color: #2f3b68;
+            font-weight: 500;
+        }
+        input[type="text"], input[type="number"], textarea, select {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #d1d6e0;
+            margin-top: 4px;
+            margin-bottom: 10px;
+            font-size: 1em;
+            background: #f7f9fc;
+            transition: border 0.2s;
+        }
+        input:focus, textarea:focus, select:focus {
+            border: 1.5px solid #3652b2;
+            outline: none;
+            background: #eef2fa;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #f7f9fc;
+            border-radius: 9px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        th, td {
+            padding: 9px 6px;
+            text-align: left;
+            font-size: 0.97em;
+            vertical-align: middle;
+        }
+        th {
+            background: #eef2fa;
+            color: #2f3b68;
+            font-weight: 600;
+        }
+        tr:not(:last-child) td {
+            border-bottom: 1px solid #e7eaf3;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px 0;
+            background: #3351ba;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-size: 1.08em;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(51,81,186,0.08);
+            cursor: pointer;
+            transition: background .18s;
+            margin-top: 12px;
+        }
+        button[type="submit"]:hover {
+            background: #21306e;
+        }
+        .delete-cell {
+            text-align: center;
+            color: #e04a4a;
+            font-weight: 500;
+        }
+        @media (max-width: 650px) {
+            .container {
+                margin: 10px;
+                padding: 11px 3vw 9px 3vw;
+            }
+            table, th, td {
+                font-size: 0.92em;
+                padding: 6px 2px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>{% if edit_mode %}Редактировать{% else %}Создать{% endif %} заявку на закупку</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <h3>Позиции заявки</h3>
+            {{ formset.management_form }}
+            <table>
+                <tr>
+                    <th>Товар</th>
+                    <th>Количество</th>
+                    <th>Комментарий</th>
+                    {% if edit_mode %}
+                        <th>Удалить</th>
+                    {% endif %}
+                </tr>
+                {% for f in formset %}
+                <tr>
+                    <td>{{ f.item.label_tag }} {{ f.item }}</td>
+                    <td>{{ f.quantity.label_tag }} {{ f.quantity }}</td>
+                    <td>{{ f.comment.label_tag }} {{ f.comment }}</td>
+                    {% if edit_mode %}
+                        <td class="delete-cell">{{ f.DELETE }} Удалить</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </table>
+            <button type="submit">Сохранить</button>
+        </form>
+    </div>
+</body>
+</html>
+

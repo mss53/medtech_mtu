@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Движения МТС</title>
+    <style>
+        body {
+            background: #f4f6fb;
+            font-family: "Segoe UI", "Arial", sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1280px;
+            margin: 38px auto 30px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(24,38,80,0.14);
+            padding: 32px 36px 24px 36px;
+        }
+        h2 {
+            margin-top: 0;
+            font-weight: 700;
+            font-size: 1.28em;
+            color: #1a2450;
+            margin-bottom: 20px;
+        }
+        form {
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 18px 14px;
+        }
+        form label {
+            font-weight: 500;
+            color: #2f3b68;
+            margin-right: 5px;
+        }
+        input[type="date"], select {
+            padding: 7px 11px;
+            border-radius: 8px;
+            border: 1px solid #d1d6e0;
+            background: #f7f9fc;
+            font-size: 1em;
+            margin-right: 6px;
+            transition: border .18s;
+        }
+        input[type="date"]:focus, select:focus {
+            border: 1.5px solid #3652b2;
+            outline: none;
+            background: #eef2fa;
+        }
+        button[type="submit"] {
+            padding: 9px 22px;
+            background: #3351ba;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-size: 1em;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(51,81,186,0.08);
+            cursor: pointer;
+            transition: background .18s;
+        }
+        button[type="submit"]:hover {
+            background: #21306e;
+        }
+        .table-actions {
+            margin-bottom: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #f7f9fc;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 18px;
+            font-size: 0.98em;
+        }
+        th, td {
+            padding: 10px 8px;
+            text-align: left;
+        }
+        th {
+            background: #eef2fa;
+            color: #2f3b68;
+            font-weight: 600;
+            border-bottom: 2px solid #d1d6e0;
+        }
+        tr:not(:last-child) td {
+            border-bottom: 1px solid #e7eaf3;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        a, .action-link {
+            color: #3351ba;
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 8px;
+            padding: 6px 12px;
+            background: #eef2fa;
+            transition: background .16s, color .16s;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        a:hover, .action-link:hover {
+            background: #cdd9f3;
+            color: #21306e;
+        }
+        .plus-link {
+            font-size: 1.07em;
+            font-weight: bold;
+            background: #e7f1fb;
+            padding: 9px 20px;
+            border-radius: 9px;
+        }
+        .plus-link:hover {
+            background: #b3cdfc;
+            color: #1a2450;
+        }
+        @media (max-width: 1024px) {
+            .container {
+                padding: 16px 2vw 8px 2vw;
+            }
+            table, th, td {
+                font-size: 0.97em;
+            }
+        }
+        @media (max-width: 800px) {
+            .container {
+                padding: 6px 1vw 6px 1vw;
+            }
+            table, th, td {
+                font-size: 0.92em;
+            }
+            form {
+                gap: 8px 3vw;
+            }
+        }
+        @media (max-width: 640px) {
+            .container {
+                max-width: 99vw;
+                padding: 2px 2vw 2px 2vw;
+            }
+            table, th, td {
+                font-size: 0.88em;
+                padding: 7px 4px;
+            }
+            form {
+                flex-direction: column;
+                gap: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Движения МТС</h2>
+        <form method="get">
+            <label>С:</label>
+            <input type="date" name="start_date" value="{{ start_date }}">
+            <label>По:</label>
+            <input type="date" name="end_date" value="{{ end_date }}">
+            <label>Склад:</label>
+            <select name="warehouse">
+                <option value="">Все</option>
+                {% for w in warehouses %}
+                    <option value="{{ w.id }}" {% if w.id|stringformat:"s" == selected_warehouse %}selected{% endif %}>{{ w.name }}</option>
+                {% endfor %}
+            </select>
+            <label>Тип:</label>
+            <select name="type">
+                <option value="">Все</option>
+                <option value="receipt" {% if selected_type == 'receipt' %}selected{% endif %}>Поступление</option>
+                <option value="move" {% if selected_type == 'move' %}selected{% endif %}>Перемещение</option>
+                <option value="writeoff" {% if selected_type == 'writeoff' %}selected{% endif %}>Списание</option>
+            </select>
+            <button type="submit">Фильтровать</button>
+        </form>
+        <form method="get" action="{% url 'movements_export_excel' %}" class="table-actions">
+            <input type="hidden" name="start_date" value="{{ start_date }}">
+            <input type="hidden" name="end_date" value="{{ end_date }}">
+            <input type="hidden" name="warehouse" value="{{ selected_warehouse }}">
+            <input type="hidden" name="type" value="{{ selected_type }}">
+            <button type="submit">Выгрузить в Excel</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Тип</th>
+                    <th>МТС</th>
+                    <th>Серийный номер</th>
+                    <th>Партия</th>
+                    <th>Кол-во</th>
+                    <th>Откуда</th>
+                    <th>Куда</th>
+                    <th>Ответственный</th>
+                    <th>Комментарий</th>
+                    <th>Договор поставки</th>
+                    <th>История</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in movements %}
+                <tr>
+                    <td>{{ m.date|date:"d.m.Y H:i" }}</td>
+                    <td>{{ m.get_type_display }}</td>
+                    <td>{{ m.item_card.item.name }}</td>
+                    <td>{{ m.item_card.serial_number }}</td>
+                    <td>{{ m.item_card.batch }}</td>
+                    <td>{{ m.quantity }}</td>
+                    <td>
+                        {% if m.from_warehouse %}{{ m.from_warehouse.name }}{% endif %}
+                        {% if m.from_department %} ({{ m.from_department.name }}){% endif %}
+                    </td>
+                    <td>
+                        {% if m.to_warehouse %}{{ m.to_warehouse.name }}{% endif %}
+                        {% if m.to_department %} ({{ m.to_department.name }}){% endif %}
+                    </td>
+                    <td>
+                        {% if m.user %}{{ m.user.get_full_name|default:m.user.username }}{% endif %}
+                    </td>
+                    <td>{{ m.comment }}</td>
+                    <td>
+                        {% with po=m.item_card.purchase_order %}
+                            {% if po %}
+                                №{{ po.contract_number }} от {{ po.created_at|date:"d.m.Y" }}<br>
+                                <b>Поставщик:</b> {{ po.supplier.name }}<br>
+                                {% if po.contract_file %}
+                                    <a href="{{ po.contract_file.url }}" target="_blank">[Файл договора]</a>
+                                {% endif %}
+                            {% else %}
+                                —
+                            {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>
+                        <a href="{% url 'itemcard_detail' m.item_card.id %}">{{ m.item_card.serial_number }}</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="12" style="text-align:center;">Нет данных</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p>
+            <a href="{% url 'movement_create' %}" class="plus-link">+ Создать новое движение</a>
+        </p>
+        <p>
+            <a href="{% url 'home' %}">На главную</a>
+        </p>
+    </div>
+</body>
+</html>
+

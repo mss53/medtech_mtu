@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Карточка МТС</title>
+    <style>
+        body {
+            background: #f4f6fb;
+            font-family: "Segoe UI", "Arial", sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 720px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(24,38,80,0.14);
+            padding: 32px 38px 30px 38px;
+        }
+        h2, h3 {
+            margin-top: 0;
+            font-weight: 700;
+            color: #1a2450;
+        }
+        h2 {
+            font-size: 1.28em;
+            margin-bottom: 22px;
+        }
+        h3 {
+            font-size: 1.14em;
+            margin-bottom: 13px;
+        }
+        ul {
+            padding: 0 0 10px 0;
+            margin: 0 0 16px 0;
+            list-style: none;
+        }
+        ul li {
+            padding: 6px 0 3px 0;
+            font-size: 1.05em;
+        }
+        ul li strong {
+            color: #3652b2;
+        }
+        form {
+            margin-bottom: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 10px 18px;
+        }
+        label {
+            font-weight: 500;
+            color: #2f3b68;
+            margin-right: 7px;
+        }
+        select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #d1d6e0;
+            background: #f7f9fc;
+            font-size: 1em;
+            transition: border .18s;
+        }
+        select:focus {
+            border: 1.5px solid #3652b2;
+            outline: none;
+            background: #eef2fa;
+        }
+        button[type="submit"] {
+            padding: 9px 22px;
+            background: #3351ba;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-size: 1.04em;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(51,81,186,0.08);
+            cursor: pointer;
+            transition: background .18s;
+        }
+        button[type="submit"]:hover {
+            background: #21306e;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #f7f9fc;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 18px;
+        }
+        th, td {
+            padding: 10px 8px;
+            text-align: left;
+            font-size: 0.97em;
+        }
+        th {
+            background: #eef2fa;
+            color: #2f3b68;
+            font-weight: 600;
+            border-bottom: 2px solid #d1d6e0;
+        }
+        tr:not(:last-child) td {
+            border-bottom: 1px solid #e7eaf3;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        a {
+            color: #3351ba;
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 8px;
+            padding: 6px 12px;
+            background: #eef2fa;
+            transition: background .16s, color .16s;
+            margin-right: 5px;
+        }
+        a:hover {
+            background: #cdd9f3;
+            color: #21306e;
+        }
+        .centered {
+            text-align: center;
+        }
+        @media (max-width: 780px) {
+            .container {
+                padding: 16px 3vw 12px 3vw;
+            }
+            table, th, td {
+                font-size: 0.95em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>
+            Карточка МТС: {{ item_card.item.name }}
+            {% if item_card.serial_number %}, SN: {{ item_card.serial_number }}{% endif %}
+        </h2>
+        <ul>
+            <li><strong>Партия:</strong> {{ item_card.batch }}</li>
+            <li><strong>Склад:</strong> {{ item_card.warehouse }}</li>
+            <li><strong>Подразделение:</strong> {{ item_card.department }}</li>
+            <li><strong>Количество:</strong> {{ item_card.quantity }}</li>
+            <!-- Другие важные поля по ItemCard при необходимости -->
+        </ul>
+
+        <h3>Журнал истории эксплуатации</h3>
+        <form method="get">
+            <label>Тип события:</label>
+            <select name="event_type">
+                <option value="">Все события</option>
+                <option value="commission" {% if selected_event_type == "commission" %}selected{% endif %}>Ввод в эксплуатацию</option>
+                <option value="receipt" {% if selected_event_type == "receipt" %}selected{% endif %}>Поступление</option>
+                <option value="move" {% if selected_event_type == "move" %}selected{% endif %}>Перемещение</option>
+                <option value="writeoff" {% if selected_event_type == "writeoff" %}selected{% endif %}>Списание</option>
+                <option value="maintenance" {% if selected_event_type == "maintenance" %}selected{% endif %}>ТО/Ремонт</option>
+            </select>
+            <button type="submit">Фильтровать</button>
+        </form>
+        <table>
+            <tr>
+                <th>Дата</th>
+                <th>Событие</th>
+                <th>Описание</th>
+                <th>Ответственный</th>
+                <th>Документ</th>
+            </tr>
+            {% for ev in event_logs %}
+            <tr>
+                <td>{{ ev.date|date:"d.m.Y H:i" }}</td>
+                <td>{{ ev.get_event_type_display }}</td>
+                <td>{{ ev.description }}</td>
+                <td>
+                    {% if ev.user %}
+                        {{ ev.user.get_full_name|default:ev.user.username }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if ev.related_file %}
+                        <a href="{{ ev.related_file.url }}" target="_blank">Файл</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="centered">Нет событий</td>
+            </tr>
+            {% endfor %}
+        </table>
+        <a href="{% url 'stock_list' %}">Назад к списку МТС</a>
+    </div>
+</body>
+</html>
+

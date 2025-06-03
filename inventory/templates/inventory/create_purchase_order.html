@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Оформление заказа поставщику</title>
+    <style>
+        body {
+            background: #f4f6fb;
+            font-family: "Segoe UI", "Arial", sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 480px;
+            margin: 60px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(24,38,80,0.14);
+            padding: 38px 32px 26px 32px;
+        }
+        h2 {
+            margin-top: 0;
+            font-weight: 700;
+            font-size: 1.35em;
+            color: #1a2450;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        form {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            color: #2f3b68;
+            font-weight: 500;
+            margin-bottom: 7px;
+        }
+        input[type="text"], input[type="file"], textarea, select {
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 9px;
+            border: 1px solid #d1d6e0;
+            margin-bottom: 18px;
+            font-size: 1em;
+            background: #f7f9fc;
+            transition: border 0.2s;
+        }
+        input[type="file"] {
+            background: #fff;
+            padding: 7px 0;
+        }
+        textarea {
+            min-height: 70px;
+        }
+        input:focus, textarea:focus, select:focus {
+            border: 1.5px solid #3652b2;
+            outline: none;
+            background: #eef2fa;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px 0;
+            background: #3351ba;
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-size: 1.08em;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(51,81,186,0.08);
+            cursor: pointer;
+            transition: background .18s;
+            margin-top: 8px;
+        }
+        button[type="submit"]:hover {
+            background: #21306e;
+        }
+        .btn-back {
+            display: inline-block;
+            margin-top: 8px;
+            text-decoration: none;
+            color: #3351ba;
+            background: #eef2fa;
+            padding: 8px 18px;
+            border-radius: 8px;
+            transition: background .16s, color .16s;
+            font-weight: 500;
+            text-align: center;
+        }
+        .btn-back:hover {
+            background: #cdd9f3;
+            color: #21306e;
+        }
+        .errorlist {
+            color: #e04a4a;
+            background: #ffeaea;
+            border-radius: 8px;
+            padding: 8px 14px;
+            margin-bottom: 14px;
+            list-style: none;
+        }
+        @media (max-width: 520px) {
+            .container {
+                margin: 18px;
+                padding: 14px 4vw 10px 4vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Оформление заказа поставщику по заявке №{{ purchase_request.id }}</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <label>Поставщик: {{ form.supplier }}</label>
+            <label>Номер договора: {{ form.contract_number }}</label>
+            <label>Файл договора: {{ form.contract_file }}</label>
+            <label>Комментарий:<br>{{ form.comment }}</label>
+            <button type="submit">Создать заказ</button>
+        </form>
+        <a href="{% url 'purchase_request_detail' purchase_request.id %}" class="btn-back">Вернуться к заявке</a>
+    </div>
+</body>
+</html>
+
